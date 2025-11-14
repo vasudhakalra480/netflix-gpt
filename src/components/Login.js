@@ -1,39 +1,103 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import Header from './Header'
 import { useState } from 'react';
+import { checkValidData } from '../utils/validate';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from '../utils/firebase';
+import { useNavigate } from 'react-router-dom';
+import { addUser } from '../utils/userSlice';
+import { useDispatch } from 'react-redux';
 
 const Login = () => {
+  const navigate= useNavigate();
+  const dispatch = useDispatch();
 
   const [isSignInForm, setIsSignInForm] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  const email = useRef(null);
+  const password = useRef(null);
+  const name = useRef(null); //take this as Homework
+
+  const handleButtonClick = (e) => {
+    //validate the form data
+    // email.current.value - gives ref to the input in the form of an object - will give value in email.current.value
+    const message = checkValidData(email.current.value, password.current.value)
+    setErrorMessage(message);
+    if (message) return;
+    //sign in /sign up
+    if (!isSignInForm) {
+      createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          updateProfile(userCredential.user, {
+            displayName: name.current.value, 
+            photoURL: "https://scontent-del2-1.xx.fbcdn.net/v/t1.6435-1/197100804_1610819182444941_5593279179614464248_n.jpg?stp=dst-jpg_s480x480_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_ohc=OxpTkPm2A4YQ7kNvwH9vO5R&_nc_oc=Adn84T9jObsbOWUVEvrx-8HGPHCvcXjyeDuedDKwyd2XkHxJE0GmrbwBTG0ZpRogD6U&_nc_zt=24&_nc_ht=scontent-del2-1.xx&_nc_gid=QpvzsCMFXbc3WU8aBIDIDg&oh=00_AfiZZt39XENOPkw_wn0y2i621NTiW0GCOL-zTYvv8kT3vA&oe=693EC881"
+          })
+          .then(() => {
+            const { uid, email, displayName, photoURL } = auth.currentUser;
+            dispatch(addUser({
+              uid: uid, 
+              email: email, 
+              displayName: displayName, 
+              photoURL: photoURL
+            }));
+            navigate('/browse');
+          }).catch((error) => {
+            // An error occurred
+            // ...
+          });
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    }
+    else {
+      signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          navigate('/browse');
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    }
+    //OR
+    // if(!message)
+    // if(message === null)
+  }
   const toggleSignInForm = () => {
     setIsSignInForm(!isSignInForm);
   }
-  
+
   return (
     <div>
       <Header />
       <div className='absolute'>
-          <img
-              src="https://assets.nflxext.com/ffe/siteui/vlv3/69bec183-9cc8-49d4-8fc2-08228d3c91b4/web/IN-en-20250414-TRIFECTA-perspective_c8273fb1-8860-4ff5-bd1c-c2c4b44d5f2a_large.jpg"
-              alt="background"
-          />
+        <img
+          src="https://assets.nflxext.com/ffe/siteui/vlv3/69bec183-9cc8-49d4-8fc2-08228d3c91b4/web/IN-en-20250414-TRIFECTA-perspective_c8273fb1-8860-4ff5-bd1c-c2c4b44d5f2a_large.jpg"
+          alt="background"
+        />
       </div>
-      <form className='absolute p-12 bg-black w-3/12 my-36 mx-auto right-0 left-0 text-white bg-opacity-80'>
+      <form onSubmit={(e) => e.preventDefault()} className='absolute p-12 bg-black w-3/12 my-36 mx-auto right-0 left-0 text-white bg-opacity-80'>
         <h1 className='font-bold text-3xl py-4'>{isSignInForm ? 'Sign In' : 'Sign Up'}</h1>
         {!isSignInForm && (
-          <input type="text" placeholder='Full Name' className='p-4 my-4 w-full bg-gray-700' />
+          <input ref={name} type="text" placeholder='Full Name' className='p-4 my-4 w-full bg-gray-700' />
         )}
-        <input type="text" placeholder='Email Address' className='p-4 my-4 w-full bg-gray-700' />
-        <input type="password" placeholder='Password' className='p-4 my-4 w-full bg-gray-700' />
-        <button className='p-4 my-6 bg-red-700 w-full rounded-lg'>{isSignInForm ? 'Sign In' : 'Sign Up'}</button>
+        <input ref={email} type="text" placeholder='Email Address' className='p-4 my-4 w-full bg-gray-700' />
+        <input ref={password} type="password" placeholder='Password' className='p-4 my-4 w-full bg-gray-700' />
+        <p className='text-red-500 text-lg font-bold'>{errorMessage}</p>
+        <button className='p-4 my-6 bg-red-700 w-full rounded-lg' onClick={handleButtonClick}>{isSignInForm ? 'Sign In' : 'Sign Up'}</button>
         <p className='py-4 cursor-pointer' onClick={toggleSignInForm}>
-        {isSignInForm 
-          ? 'New to Netflix? Sign Up Now' 
-          : 'Already have an account? Sign In'
-        }</p>
+          {isSignInForm
+            ? 'New to Netflix? Sign Up Now'
+            : 'Already have an account? Sign In'
+          }</p>
       </form>
     </div>
   )
-}
+} 
 
 export default Login
