@@ -32,6 +32,11 @@
 - update store with trailer video data
 - embed the youtube video and make it autoplay and mute
 - added tialwind classes to make maincontainer look good
+- build secondary component
+- build movielist, movied card
+- tmdb image cdn url
+- made brosepage amazing with tailwind css
+- usepopularmovies custom hook
 
 
 # Features
@@ -237,3 +242,11 @@
     - now i want to have title above the video so make title as absolute. give w-screen and aspect-video to videotitle as well it will cover whole background/whole screen
     - now i want to autoplay the youtube video -  add autoplay =1 and mute=1 in iframe src
     - now lets make the seocnd container
+    - let us build movie list - now for each entry i need to make a moviecard for that i have image path but where it is hoisted ineed to check that on tmdb website from guides-images - basics
+    - keep in constant file
+    - similar to now playing we can add trending and all as well
+    - for secondary container there are 2 divs 
+    - given black bg to parent div to match deisgn and child div negative margin to move things up a little 
+    - now fetch movies for playing, trending - get api from tmdb
+    - similary make hooks for others as well
+    - next we will be using gpt apis we will make the website responsive as well
