@@ -18,6 +18,20 @@
 - created redux store with user slice
 - implemented signout
 - update profile
+- fetch from TMBD movies
+- BugFix: Signup user display name and profile picture update
+- BugFix: If the user is not logged in redirect /browse to login page and vice versa
+- Unsubscibed to the onauthstatechanged callback
+- Register TMDB API & create an app & get access token
+- Get Data from TMDB now playing list
+- Custom Hook for Now Playing Movies
+- Create Movieslice
+- Upadte Store With Movies Data
+- Planning for main container and secondary container
+- Fetch data for trailer video
+- update store with trailer video data
+- embed the youtube video and make it autoplay and mute
+- added tialwind classes to make maincontainer look good
 
 
 # Features
@@ -149,3 +163,77 @@
     - we will see that phtotourl and dispalyname is not updating we need to diaptch an action after update user as well
     - we will not have updated values in usercredential(not the updated value), so updated value is in auth.currentUser(updated value)
     - we will build movies
+
+
+
+    Episode 2 of Netflix GPT
+    - Now when i am signed out i am still able to access /browse page
+    - similarly if i am logged in i should not go to the login page
+    - why this is happening is we are not chcking auth on browse page that if the user is present or not(user accesstoken is not there)
+    - we already have onauthstatechange - kind of event listner which checks on very render of the page. can use this to check auth state and setting up our store. 
+    - if the user is logs in or logs out we should update the store, ideally we should naviagte here but we will get error because naviagte should be used inside routerprovider
+    - so lets refactor our code, i should add my that useffect where i can get accesss to routerprovider
+    - i should keep that in place where i can get access easily i can put in HEader component because header will always be there so put that useeffect from body .js to header,js - another bug fix
+    useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                // https://firebase.google.com/docs/reference/js/auth.user
+                const { uid, email, displayName, photoURL } = user;
+                dispatch(addUser({uid: uid, email: email, displayName: displayName, photoURL: photoURL}));
+            } else {
+                // User is signed out
+                // ...
+                dispatch(removeUser())
+            }
+        });
+    }, [])
+    - my header is now inside routerprovider so now it will work
+    - now navigation i dont need to do it from login page now i can do that from header.js so now i can put all my routing logic in header.js
+    - it will handle if the user is logged in redirect the user to /browse else redirect back to login page
+    - so out navigate is only in header,js now
+    - now i dont need to do explicit redirection froms ign out as well because onauthstatechange will automatically be called and redirect accrodingly
+    - this will solve my issue also
+    - one more thing now in header.js we have useeffect onauthstatechanged-whenever my header loads it will keep attaching event listeners so unsubscribe to this when the component unmounts so how will i unsubscribe - onauthstatechangereturns us an unsubscribe function - read firebase documentation
+    return () => unsubscibe()
+    - for string always use constants like photourl. i should not haardcode url suppose i want toc hange logo i can do that form 1 place
+    - constanfiles-all hardcoded strings, all hardcoded values, all hardcoded urls
+    - start building browse page
+    - use TMDB for apis - need tmdb access token to authorize. we need to everytime pass this options   
+    - get nowplaying movies using fetch in browse page. make that function ana async function because we will be doing a fetch request inside it
+    - how will i call the api. i will call the api in useeffect with empty dependency array - so that i can call it only once
+    - now i will be able to see 2 console.logs inside my console. everything happens 2 time why.api call is made 2 times , events are called 2 times. this basically happens because of react strict mode
+    - in index.js we wrapped our project in React.StrictMode. If i remove this react.strict mode it will my api only once
+    - it just happens in our local, in case of production it will not called twice
+    - the reason why it happens twice because react does extra rendering of your components to check for some inconsistencies in your calls. I tonly happens in development mode - it will throw an error if there is any inconsitency in your rendering cycle
+    - since we got the data we need to add them in store
+    - create one more slice movie slice
+    - check if movies has been added to store. we can see movies slice in store this means we have successfully added slice in our store
+    - our browse component is looking ugly now it should only have rendering logic so extract this code outside
+    - lets us create a hook to get the data and return it to a compoennt
+    - make a afolder clled hooks - hooks always start from use - what is a ahook at the end of the day it is normal js function. now my browse component looks more clean
+    - lets start building our browse page - background video then movies
+    - lets make a plan - 2 parts -one is playing, second-movie recommendation where movies are shown
+    - let us create 2 containers now - MainCOntainer, secondarycontainer
+    - now what do i need in mainconatienr - movie, title, description- lets get data from selector
+    - i need only one movie to render in maincontainer
+    - so if i take first movie from movies comp my code will break because first time my code is executed my nowplaying movies is null and we are trying to fetch its fisrt elem.so check if movies === null the return from that comp do not render anything
+    - now we have made videotitle component i need to make now videobackground component for that i need to have traileer for the movie and we dont have that in nowplaying movies detail. SO in TMDB Movies we have movies -  we can get trailor using movie_id. it will give all videos related to that movie
+    - i can use tmdb platform to call api - we got videos related to that movies(basically it will container songs of the movie, treasure of the movie). we are only concerned about movie trailer so the respponse has type: clip, trailer, teasure so i am concerned about trailer that key is basically you tube key and this will help to fetch the video form youtube. make an api call this comp will need movie id
+    - filter data basis the trailer. now if the filtered results has many movies then take the first trailer else take video first video
+    - now render the video it has you tube key
+    - get the video from youtube by using share option which gives option of iframe. it is giving error of frameborder which is not accptable in jsx camel case is allwed so do it in camel case
+    - there are 2 ways to embed you tube video into our porject 
+    - make a state
+        const [trailerId, setTrailerId] = useState(null)
+        and settrailerid in getmovievideos  and change trailerId dynamic
+        src={"https://www.youtube.com/embed/"+ trailerId}
+    - but i can keep this information in my redux store
+    - let us put trailer in our store- add trailer in movies lsice
+    - now i will make a custom hook because it is lookin very ugly comp should have only rendering logic
+    - this is known as MODULAR CODING -SEPARATION OF CONCERNS, help in testing
+    - now i wnat to make width of video to full width
+    - have given full w-screen to iframe and its parent div but to maintian its expect ratio we need to give aspect-video
+    - now i want to have title above the video so make title as absolute. give w-screen and aspect-video to videotitle as well it will cover whole background/whole screen
+    - now i want to autoplay the youtube video -  add autoplay =1 and mute=1 in iframe src
+    - now lets make the seocnd container

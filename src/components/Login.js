@@ -4,12 +4,11 @@ import { useState } from 'react';
 import { checkValidData } from '../utils/validate';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../utils/firebase';
-import { useNavigate } from 'react-router-dom';
 import { addUser } from '../utils/userSlice';
 import { useDispatch } from 'react-redux';
+import { PHOT_URL } from '../utils/constants';
 
 const Login = () => {
-  const navigate= useNavigate();
   const dispatch = useDispatch();
 
   const [isSignInForm, setIsSignInForm] = useState(true);
@@ -31,7 +30,7 @@ const Login = () => {
         .then((userCredential) => {
           updateProfile(userCredential.user, {
             displayName: name.current.value, 
-            photoURL: "https://scontent-del2-1.xx.fbcdn.net/v/t1.6435-1/197100804_1610819182444941_5593279179614464248_n.jpg?stp=dst-jpg_s480x480_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_ohc=OxpTkPm2A4YQ7kNvwH9vO5R&_nc_oc=Adn84T9jObsbOWUVEvrx-8HGPHCvcXjyeDuedDKwyd2XkHxJE0GmrbwBTG0ZpRogD6U&_nc_zt=24&_nc_ht=scontent-del2-1.xx&_nc_gid=QpvzsCMFXbc3WU8aBIDIDg&oh=00_AfiZZt39XENOPkw_wn0y2i621NTiW0GCOL-zTYvv8kT3vA&oe=693EC881"
+            photoURL: PHOT_URL
           })
           .then(() => {
             const { uid, email, displayName, photoURL } = auth.currentUser;
@@ -41,7 +40,6 @@ const Login = () => {
               displayName: displayName, 
               photoURL: photoURL
             }));
-            navigate('/browse');
           }).catch((error) => {
             // An error occurred
             // ...
@@ -56,7 +54,6 @@ const Login = () => {
     else {
       signInWithEmailAndPassword(auth, email.current.value, password.current.value)
         .then((userCredential) => {
-          navigate('/browse');
         })
         .catch((error) => {
           const errorCode = error.code;
