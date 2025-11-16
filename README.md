@@ -37,6 +37,9 @@
 - tmdb image cdn url
 - made brosepage amazing with tailwind css
 - usepopularmovies custom hook
+- GPT Search Page
+- Gpt Search Bar
+- (BONUS) Multi language feature in our app
 
 
 # Features
@@ -250,3 +253,17 @@
     - now fetch movies for playing, trending - get api from tmdb
     - similary make hooks for others as well
     - next we will be using gpt apis we will make the website responsive as well
+    - Introduction to GPT - sometime i dont know wich movie to watch i type in the search bar and gpt apis give me suggestions  
+    - chatgpt is an interface which is using gpt apis to give you suggestions and apis are built by open ai/gpt apis
+    - we will toggle the component on click of gpt button 
+    - we will store this information in store
+    - what should a gpt search have - it should have saerchbar and moviesuggestions
+    - ideally every text should come from constant file
+    - because in akshay says in paytm we have diff languages english, hindi and so on 
+    - language based websites are used widely 
+    - lets store language as well
+    - let build a dropdown for language, so now when our language change our page should change
+    - let us store language- we can store it in user or app slice
+    - user has info about firebase so lets not use that lets make another slice for this app based configuration
+    - never push console.logs to production
+    - so we have made our website multilingual
