@@ -40,6 +40,16 @@
 - GPT Search Page
 - Gpt Search Bar
 - (BONUS) Multi language feature in our app
+- GPT search Open api key
+- gpt search api call
+- fetched gptmoviedsuggestions form tmdb 
+- created gpt slice and added data
+- reused movie list comp to make movie suggestion conatiner
+- memoization
+- added .env file
+- adding .env to gitignore
+- made our site responsive
+
 
 
 # Features
@@ -364,5 +374,9 @@
     if you dont want to spend on open ai apis you can ask the user to enter thier api key and use the websote in that case you need to replace the process.env.api_key to thier api key 
     these 3-4 lines would save a lot of api calls - vvvv imp optimization
 
-    we can make folder indise compoennts called gpt and put all gpt related stuff inside it 
-    similarly fo rutils we can craete store folder and put all 
+    we can make folder indise compoennts called gpt and put all gpt related stuff inside it and make sure to change routing also
+    inside browse folder we can put browse things, login folder-login things
+    similarly fo rutils we can craete store folder and put all redux slices in it
+    lets make our website responsive
+    bg-black (will take up for phones small) sm:bg-black-900(tab) md:bg-green-900(desktop)
+    change react app in index.html, add you own favicon
