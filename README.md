@@ -267,3 +267,102 @@
     - user has info about firebase so lets not use that lets make another slice for this app based configuration
     - never push console.logs to production
     - so we have made our website multilingual
+    - on clicking when i click on search it should call gpt api and get the results
+    - setup openai by installing openai using npm install --save openai and craete a file and add boilerplate code (check its github repo) and export it - this will give you access to some of the default functions
+    - useref for seacrhtext and make an api call to get movie results
+    - we will get an error on the page - open ai will warn you that you are calling open ai api from frontend calling from client side not server side because my secret an be leaked/compromised. these things should be done form node/server. to continue from client side there is flag we need to allow in openai in openai.js-dangerouslyAllowBrowser
+    - if we type in the the text like funny indian retro movies on chatgpt it will give us many information. we dont want that we only want name of the movies
+    - so pass a gpt queries in which we we will have actual text like ------ Act as a movie recommendation system and suggest some movies based on the following query
+    - we got the result in the same way. but right now we dont have paid version of open ai key so in our case it is giving us error
+    - lets try to search for these movies in Tmdb website using search movie api and we searched for that movies and we got the movie response
+    - const searchMovieTmdb = async (movie) => {
+        const data = await fetch(`https://api.themoviedb.org/3/search/movie?query=${movie}&page=1`, API_OPTIONS)
+        const json = await data?.json()
+        return json.results;
+    }
+    this will take some time to execute as it is an async function
+     gptMovies?.map(() => {
+            searchMovieTmdb()
+        })
+        in 
+        const handleGptSearchClick = async () => {
+        const gptQuery = "Act as a movie recommendation system and suggest some movies based on the following query: " + searchText.current.value + ". only give me names of 5 movies, comma separated like the example given ahead. Example Result: Gadar, Sholay, Don, Golmal, Koi Mil Gaya";
+        const gptResults = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: gptQuery }],
+        });
+        if (!gptResults?.choices) //TODO: show some error to user
+            console.log(gptResults?.choices?.[0]?.message?.content);
+        //Andaz Apna Apna, DDLJ, 3 Idiots, Munna Bhai MBBS, PK
+        const gptMovies = gptResults?.choices?.[0]?.message?.content.split(','); //this will give array of movie names
+        //["Andaz Apna Apna", "DDLJ", "3 Idiots", "Munna Bhai MBBS", "PK"]
+
+        //For each movie i will search TMDB APi
+        //search for each movie in tmdb api
+        gptMovies?.map(() => {
+            searchMovieTmdb()
+        })
+
+    }
+
+    will not give us the results as that is an async fucntion and search movie will be called 5 times for 5 movies this is normal js not react. these 5 api calls will not wait for one to finish and then start other it will make 5 api calls so 
+    searchMovieTmdb will result promise not the result. it will be an array of 5 promises. now how will i get data from this promise array. tehre is a function called promise.all
+    // we got the results after few seconds in array 
+    //for amar, akbar,anthony we got 3 results one hindi, malyalam, telugu
+    //for padosan we got 4 results-padosan , professor ki padosan, nayee padosan, padosan 1968
+    //tmdbMovieResults = [[{},{},{}], [{},{}], [{},{},{},{}], [{},{}], [{}]]// it has given me lot of movies
+    //lets show all movies, below the search bar
+    now push all teh movies to store
+    push it in gptslice, addgptMovies dispatch an action from gptsearchbar
+    lets add search results as well
+    dispatch(addGptMovieResult({movieName: gptMovies, movieResults: tmdbMovieResults}));
+    so we now have movienames and moviesresults in our store in gptslice as movieNames and movieResulyts
+    we can extract that in hook the extracting language
+    let us now build gptmoviesugggestons
+    {movieNames.map((movieName, index) => {
+            return (
+                <MovieList key={movieName} title = {movieName} movies = {movieResults[index]}/>
+            )
+    })}
+    for wach moviename we will have moviereults at the same place because it is array of promises and to resolve this we have used Promise.all.
+    so by using this everything is working fine horizonatla scroll as well and moviename and its results
+    Movieslist is MODULAR- we are reusing it
+    do error handling in moviecard if posterpath is not present then return from tehre because in some case posterpath was not there and it was breaking means poster was not coming
+    we have used reusablility now
+    now give some opacity to the background the bakground image is upto the screen only therefore it is looking ugly below so give background image fixed position
+    now search for horror romantic indian movies - raaz, bhootnath, talaaash
+
+
+    one important thing to note here is that when i got to home page and come back to gpt search the results are still there this is because my data is persistent in my redux store
+    so if we dont want data to persist clear the slice and set it as null movieNames and movieresults
+    we can even expand more on clcking the card we can show description of the movie actors and all
+
+    we will now see how we can hide apikey for exmaple open ai key. we were dangerously setting so the best way to keep is in .env file - it is kind of setting whatever secret information you have we keep in this env file. take openapi_key and apste it in .env file. we have to add REACT_APP in .env it is imp to add react_app in front of key otherwise react wont recognise it.
+    let us also store our tmdb key. so whatever sensitive information we have store it in .env file because when we craete  bundle this constant file will bw in bundle and hacker can go to your website and can hack keys. now we will not use these keys directly in constant. how will i use then process.env.key_name like process.env.REACT_APP_TMDB_KEY. now when we craete build process.env.key_name will be visible to hacker
+    read on teh internet why do we use this- this is not related to react this is something related to basic hosting, basic deployment , basic security of our keys
+    our app is not secure there so many thing we can do it make it secure
+    if i check my github all code was going to github hooks, comp even constants file. we should not push .env file to github it should be added in gitignore so it will not be psuhed to github
+    this is similar to setting env variables in windows
+    we will need this environemnet varia ble in production so every hosting plaform has its own way of setting environment variables sometimes its pais. firebase - its paid
+    otehrwise a lot of security things happen from be - best way for security reasons because fe is client side. you psuh all the code to client side and it is not 100% secure when you connect it with be be maintains all securiity keys -that is the best security we can have
+    restart the server after making env file changes - everything is working fine
+    the last thing is lets make our project responsive
+
+    MEMOIZATION
+    when we got to chatgpt page and again come back to homepage it is making api call again then again after comin back. why it is making pai call because everytime my compoennt loads it makes an api call and updates teh store when i go to gpt page and then come back to homepage i see data was already there for movies the why to call apis again by using memoization
+    got tohook we are fetching movies and we are adding the trailer video suppose if my store has already trailer video then why to fetch again, if my store already has now playing movies should i refetch it. no
+    so this concept is known as memoization. check whether there is already data present on my store then dont make an api call else make an api call. it will save a lot of api calls . suppose a lot of 1000 users are using the platform we can save a lot of api calls
+    in case of useNowPlayingMovies
+    const nowPlayingMovies = useSelector(store => store.movies.nowPlayingMovies)
+    if nowplayingmovies is there then dont make an api call
+    useEffect(() => {
+        if(!nowPlayingMovies) getNowPlayingMovies()
+        or 
+        !nowPlayingMovies &&  getNowPlayingMovies()
+    }, [])
+    similarly fo otehr hooks
+    if you dont want to spend on open ai apis you can ask the user to enter thier api key and use the websote in that case you need to replace the process.env.api_key to thier api key 
+    these 3-4 lines would save a lot of api calls - vvvv imp optimization
+
+    we can make folder indise compoennts called gpt and put all gpt related stuff inside it 
+    similarly fo rutils we can craete store folder and put all 
